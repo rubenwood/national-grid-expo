@@ -22,9 +22,14 @@ export function EnergySourceList(props: any) {
   return (
     <>
       {props.data.map((item: EnergySource) => (
-        <ThemedText style={styles.sectionBody} key={`energy-${item.name}`}>
-          {item.value}% {item.name}
-        </ThemedText>
+        <ThemedView key={`energy-${item.name}`} style={styles.sectionBody}>
+          <ThemedView
+            style={[styles.colourSquare, { backgroundColor: item.colour }]}
+          />
+          <ThemedText style={[styles.sectionText]}>
+            {item.value}% {item.name}
+          </ThemedText>
+        </ThemedView>
       ))}
     </>
   );
@@ -85,6 +90,9 @@ export default function GenerationWheel() {
       grouped[category].push(item);
       grouped[`${category}_total`] += item.value;
     }
+    grouped.fossil.sort((a, b) => b.value - a.value);
+    grouped.renewable.sort((a, b) => b.value - a.value);
+    grouped.other.sort((a, b) => b.value - a.value);
     return grouped;
   }
 
@@ -110,15 +118,15 @@ export default function GenerationWheel() {
       />
       <ThemedView>
         <ThemedText style={[styles.sectionStyle, styles.fossil]}>
-          {groupedData.fossil_total}% Fossil Fuels
+          {groupedData.fossil_total.toFixed(2)}% Fossil Fuels
         </ThemedText>
         <EnergySourceList data={groupedData.fossil} />
         <ThemedText style={[styles.sectionStyle, styles.renewable]}>
-          {groupedData.renewable_total}% Renewables
+          {groupedData.renewable_total.toFixed(2)}% Renewables
         </ThemedText>
         <EnergySourceList data={groupedData.renewable} />
         <ThemedText style={[styles.sectionStyle, styles.other]}>
-          {groupedData.other_total}% Other
+          {groupedData.other_total.toFixed(2)}% Other
         </ThemedText>
         <EnergySourceList data={groupedData.other} />
       </ThemedView>
@@ -146,5 +154,14 @@ const styles = StyleSheet.create({
   sectionBody: {
     padding: 16,
     backgroundColor: "#38383a",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  sectionText: {
+    paddingLeft: 6,
+  },
+  colourSquare: {
+    width: 20,
+    height: 20,
   },
 });
