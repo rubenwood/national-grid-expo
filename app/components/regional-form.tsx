@@ -22,7 +22,7 @@ export default function RegionalForm() {
 
   return (
     <ThemedView>
-      <ThemedText>Enter your postcode:</ThemedText>
+      <ThemedText>Enter your postcode (e.g: RG10, M6):</ThemedText>
       <TextInput
         style={[styles.inputField]}
         onChangeText={onChangeText}
