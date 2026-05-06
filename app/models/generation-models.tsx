@@ -20,6 +20,14 @@ export type GroupedEnergyData = {
   other_total: number;
 };
 
+export type RegionalData = {
+  regionid: string;
+  dnoregion: string;
+  shortname: string;
+  postcode: string;
+  data: any;
+};
+
 export const CATEGORY_MAP: Record<string, EnergySource["category"]> = {
   gas: "fossil",
   coal: "fossil",

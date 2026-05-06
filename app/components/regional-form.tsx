@@ -3,13 +3,32 @@ import { ThemedView } from "@/components/themed-view";
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput } from "react-native";
 
-import { COLOUR_MAP } from "../models/generation-models";
+import { COLOUR_MAP, RegionalData } from "../models/generation-models";
+
+export function RegionalOutput(props: any) {
+  return (
+    <ThemedView>
+      <ThemedText>{JSON.stringify(props.rd)}</ThemedText>
+      <ThemedView style={[styles.empty]}></ThemedView>
+      <ThemedText>Region: {props.rd.shortname}</ThemedText>
+      <ThemedView style={[styles.empty]}></ThemedView>
+      <ThemedText>
+        Timeframe: {props.rd.data[0].from} - {props.rd.data[0].to}
+      </ThemedText>
+      <ThemedView style={[styles.empty]}></ThemedView>
+      <ThemedText>
+        Intensity: {props.rd.data[0].intensity.forecast} gCO2/kWh (index:{" "}
+        {props.rd.data[0].intensity.index})
+      </ThemedText>
+    </ThemedView>
+  );
+}
 
 export default function RegionalForm() {
   const [inputText, onChangeText] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [regionalData, setRegionalData] = useState(null);
+  const [regionalData, setRegionalData] = useState<RegionalData | null>(null);
 
   const onSubmitClicked = async () => {
     setLoading(true);
@@ -18,7 +37,7 @@ export default function RegionalForm() {
     );
     const respJson = await resp.json();
 
-    setRegionalData(respJson);
+    setRegionalData(respJson.data[0]);
     setLoading(false);
   };
 
@@ -37,8 +56,11 @@ export default function RegionalForm() {
         <ThemedText>{!loading ? "Submit" : "loading..."}</ThemedText>
       </Pressable>
       <ThemedView style={[styles.empty]}></ThemedView>
-      {!loading ? (
-        <ThemedText>{JSON.stringify(regionalData)}</ThemedText>
+
+      {!loading && regionalData ? (
+        <>
+          <RegionalOutput rd={regionalData} />
+        </>
       ) : null}
     </ThemedView>
   );
