@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 import {
-  CATEGORY_MAP,
   COLOUR_MAP,
   EnergySource,
   GroupedEnergyData,
 } from "../models/generation-models";
+import {
+  mapEnergySourceChartData,
+  normaliseGenerationData,
+} from "../utils/data-formatting";
 
 export function LoadingText() {
   return (
@@ -47,43 +50,18 @@ export default function GenerationWheel() {
     const resp = await fetch("https://api.carbonintensity.org.uk/generation");
     const respJson = await resp.json();
 
-    const normalData = normaliseData(respJson.data.generationmix);
-    setNormalisedData(normalData);
+    const normalisedData = normaliseGenerationData(respJson.data.generationmix);
+    setNormalisedData(normalisedData);
 
-    const inChartData = mapChartData(normalData);
+    const inChartData = mapEnergySourceChartData(normalisedData);
     setChartData(inChartData);
 
-    const inGroupedData = groupData(normalData);
+    const inGroupedData = groupData(normalisedData);
     setGroupedData(inGroupedData);
 
     const inGroupedChartData = mapGroupedChartData(inGroupedData);
     setGroupedChartData(inGroupedChartData);
   };
-
-  function normaliseData(data: any[]): EnergySource[] {
-    return data.map((item) => ({
-      name: item.fuel,
-      value: item.perc,
-      colour: COLOUR_MAP[item.fuel] ?? "#999",
-      category: CATEGORY_MAP[item.fuel] ?? "other",
-    }));
-  }
-
-  function mapChartData(data: EnergySource[]) {
-    const categoryOrder = ["fossil", "renewable", "other"];
-    const sorted = [...data].sort((a, b) => {
-      return (
-        categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category)
-      );
-    });
-
-    const chartData = sorted.map((item: EnergySource) => ({
-      value: item.value,
-      color: COLOUR_MAP[item.name] ?? "#999",
-      text: `${item.name} (${item.value}%)`,
-    }));
-    return chartData;
-  }
 
   function groupData(data: EnergySource[]): GroupedEnergyData {
     const grouped: GroupedEnergyData = {
