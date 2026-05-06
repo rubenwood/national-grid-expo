@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 import {
-    CATEGORY_MAP,
-    COLOUR_MAP,
-    EnergySource,
-    GroupedEnergyData,
+  CATEGORY_MAP,
+  COLOUR_MAP,
+  EnergySource,
+  GroupedEnergyData,
 } from "../models/generation-models";
 
 export function LoadingText() {
@@ -41,6 +41,7 @@ export default function GenerationWheel() {
   );
   const [chartData, setChartData] = useState<any[]>([]);
   const [groupedData, setGroupedData] = useState<GroupedEnergyData>();
+  const [groupedChartData, setGroupedChartData] = useState<any[]>([]);
 
   const fetchGenerationData = async () => {
     const resp = await fetch("https://api.carbonintensity.org.uk/generation");
@@ -54,6 +55,9 @@ export default function GenerationWheel() {
 
     const inGroupedData = groupData(normalData);
     setGroupedData(inGroupedData);
+
+    const inGroupedChartData = mapGroupedChartData(inGroupedData);
+    setGroupedChartData(inGroupedChartData);
   };
 
   function normaliseData(data: any[]): EnergySource[] {
@@ -65,8 +69,15 @@ export default function GenerationWheel() {
     }));
   }
 
-  function mapChartData(data: any) {
-    const chartData = data.map((item: any) => ({
+  function mapChartData(data: EnergySource[]) {
+    const categoryOrder = ["fossil", "renewable", "other"];
+    const sorted = [...data].sort((a, b) => {
+      return (
+        categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category)
+      );
+    });
+
+    const chartData = sorted.map((item: EnergySource) => ({
       value: item.value,
       color: COLOUR_MAP[item.name] ?? "#999",
       text: `${item.name} (${item.value}%)`,
@@ -90,18 +101,42 @@ export default function GenerationWheel() {
       grouped[category].push(item);
       grouped[`${category}_total`] += item.value;
     }
+
     grouped.fossil.sort((a, b) => b.value - a.value);
     grouped.renewable.sort((a, b) => b.value - a.value);
     grouped.other.sort((a, b) => b.value - a.value);
     return grouped;
   }
 
+  function mapGroupedChartData(data: GroupedEnergyData) {
+    const chartData = [
+      {
+        value: data.fossil_total,
+        color: COLOUR_MAP["gas"],
+        text: `fossil`,
+      },
+      {
+        value: data.renewable_total,
+        color: COLOUR_MAP["wind"],
+        text: `renewable`,
+      },
+      {
+        value: data.other_total,
+        color: COLOUR_MAP["nuclear"],
+        text: `other`,
+      },
+    ];
+
+    return chartData;
+  }
+
   useEffect(() => {
+    console.log("mount");
     fetchGenerationData();
-  });
+  }, []); // make sure we only fetch once
 
   if (!groupedData) {
-    return;
+    return <LoadingText />;
   }
 
   return (
@@ -109,7 +144,20 @@ export default function GenerationWheel() {
       {/* <ThemedText>{JSON.stringify(groupedData)}</ThemedText> */}
       <PieChart
         data={chartData}
-        donut
+        strokeWidth={1}
+        strokeColor="black"
+        labelsPosition="mid"
+        showText
+        textColor="white"
+        radius={160}
+        innerRadius={0}
+        textSize={10}
+      />
+      <PieChart
+        data={groupedChartData}
+        strokeWidth={1}
+        strokeColor="black"
+        labelsPosition="mid"
         showText
         textColor="white"
         radius={160}

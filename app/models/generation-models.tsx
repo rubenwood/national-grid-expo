@@ -23,10 +23,10 @@ export type GroupedEnergyData = {
 export const CATEGORY_MAP: Record<string, EnergySource["category"]> = {
   gas: "fossil",
   coal: "fossil",
-  biomass: "renewable",
   wind: "renewable",
   solar: "renewable",
   hydro: "renewable",
+  biomass: "other",
   nuclear: "other",
   imports: "other",
   other: "other",
