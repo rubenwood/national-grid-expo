@@ -1,7 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useState } from "react";
-import { Button, StyleSheet, TextInput } from "react-native";
+import { Pressable, StyleSheet, TextInput } from "react-native";
+
+import { COLOUR_MAP } from "../models/generation-models";
 
 export default function RegionalForm() {
   const [inputText, onChangeText] = useState("");
@@ -23,15 +25,18 @@ export default function RegionalForm() {
   return (
     <ThemedView>
       <ThemedText>Enter your postcode (e.g: RG10, M6):</ThemedText>
+      <ThemedView style={[styles.empty]}></ThemedView>
       <TextInput
         style={[styles.inputField]}
         onChangeText={onChangeText}
         value={inputText}
       ></TextInput>
-      <Button
-        title={!loading ? "Submit" : "loading..."}
-        onPress={onSubmitClicked}
-      />
+
+      <ThemedView style={[styles.empty]}></ThemedView>
+      <Pressable style={[styles.submitButton]} onPress={onSubmitClicked}>
+        <ThemedText>{!loading ? "Submit" : "loading..."}</ThemedText>
+      </Pressable>
+      <ThemedView style={[styles.empty]}></ThemedView>
       {!loading ? (
         <ThemedText>{JSON.stringify(regionalData)}</ThemedText>
       ) : null}
@@ -40,8 +45,21 @@ export default function RegionalForm() {
 }
 const styles = StyleSheet.create({
   inputField: {
-    borderWidth: 10,
+    flex: 1,
+    justifyContent: "center",
+    padding: 15,
+    borderRadius: 6,
     backgroundColor: "white",
+  },
+  submitButton: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: COLOUR_MAP["nuclear"],
+  },
+  empty: {
+    padding: 15,
   },
   titleContainer: {
     flexDirection: "row",
